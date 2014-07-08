@@ -1,0 +1,22 @@
+{
+    "name": "muffinJS",
+    "version": "0.0.1",
+    "main": "dist/muffin.js",
+    "ignore": [
+        "src",
+        "spec",
+        ".bowerrc",
+        ".gitignore",
+        ".jshintignore",
+        ".jshintrc",
+        "bower.json",
+        "gruntfile.js",
+        "package.json",
+        "README.md"
+    ],
+    "dependencies": {
+        "lodash": "~2.4.1"
+    },
+    "devDependencies": {
+    }
+}
