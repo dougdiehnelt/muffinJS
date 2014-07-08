@@ -1,0 +1,4 @@
+muffinJS
+========
+
+JavaScript performance library
