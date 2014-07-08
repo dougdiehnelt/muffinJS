@@ -14,6 +14,7 @@ Goals
 6. Gruntify the build process
 
 **_Stretch Goals_**
+
 1. Work with bower
 2. NPM-able?
 
