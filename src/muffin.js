@@ -2,14 +2,16 @@
     "use strict";
     var eventsTable = [];
     var uniqueId = 0;
-    var usePerformanceAPI = window && window.performance;
-    var _startEvent = function(eventDescription){
+    var navigationStart = 0;
+    var usePerformanceAPI = window && window.performance ? true : false;
+    var _startEvent = function(eventDescription, optionalData){
         var id = ++uniqueId;
         if (usePerformanceAPI){
-            eventsTable.push {
+            eventsTable.push({
                 id: id,
-                eventDescription: eventDescription
-            }
+                eventDescription: eventDescription,
+                optionalData: optionalData
+            });
             window.performance.mark(id+'_start');
             return id;
         } else {
@@ -37,17 +39,19 @@
             if (usePerformanceAPI){
                 window.performance.measure(event.id+'_total', event.id+'_start', event.id+'_end');
                 var measures = window.performance.getEntriesByName(event.id+'_total');
-                if (measures && measures.length === 1){
-                    var measure = measures[0];
-                    var measureEndTime = measure.startTime + measure.duration;
-                    retData.push({
+                if (measures && measures.length > 0){
+                    var measure = measures[measures.length-1];
+                    var measureStartTime = measure.startTime - navigationStart;
+                    var measureEndTime = measureStartTime + measure.duration;
+                    retData.events.push({
                         id: event.id,
                         description: event.eventDescription,
+                        optionalData: event.optionalData,
                         duration: measure.duration,
-                        startTime: measure.startTime
+                        startTime: measureStartTime
                     });
-                    if (!firstEventStartTime || measure.startTime < firstEventStartTime){
-                        firstEventStartTime = measure.startTime;
+                    if (!firstEventStartTime || measureStartTime < firstEventStartTime){
+                        firstEventStartTime = measureStartTime;
                     }
                     if (!lastEventEndTime || measureEndTime > lastEventEndTime ){
                         lastEventEndTime = measureEndTime;
@@ -58,17 +62,22 @@
         retData.totalTime = lastEventEndTime - firstEventStartTime;
         return retData;
     };
+    var _recordNavigation = function() {
+        eventsTable = [];
+        navigationStart = usePerformanceAPI ? window.performance.now() : Date.now();
+    };
 
     var _noop = function() {
         return;
     }
 
-    if (window && window.enableTimings){
-        muffin = {
+    if (window){
+        window.muffin = {
+            recordNavigation: _recordNavigation,
             startEvent: _startEvent,
             stopEvent: _stopEvent,
             gathStats: _gatherStats
-        }
+        };
     } else {
         muffin = {
             startEvent: _noop,
@@ -76,5 +85,5 @@
             gathStats: _noop
         }
     }
-
+    _recordNavigation();
 })();
